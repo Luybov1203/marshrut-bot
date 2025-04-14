@@ -100,7 +100,7 @@ async def day_route(callback_query: CallbackQuery):
         },
         {
             "photo": "https://images.unsplash.com/photo-1497294815431-9365093b7331",
-            "caption": "🚶‍♂️ Ты на развилке. Прямо — привычка. Вбок — ты сам.\nОстановись и выбери направление."
+            "caption": "🚶‍♂️ Ты на развилке. Прямо — привычка. Слева — ты сам.\nОстановись и выбери направление."
         },
         {
             "photo": "https://images.unsplash.com/photo-1530650052540-4693b1f4f33f",
@@ -126,7 +126,7 @@ async def session(callback_query: CallbackQuery):
 
 @dp.callback_query_handler(lambda c: c.data == "details")
 async def details(callback_query: CallbackQuery):
-    await callback_query.message.answer("Метод помогает предпринимателям и их семьям навести порядок в приоритетах. Это про смысл, а не про мотивацию.")
+    await callback_query.message.answer("Метод поможет тебе услышать себя, соблюсти баланс между личными отношениями и работой, в приоритетах. Это про смысл, а не про мотивацию.")
 
 @dp.callback_query_handler(lambda c: c.data == "restart")
 async def restart(callback_query: CallbackQuery):
