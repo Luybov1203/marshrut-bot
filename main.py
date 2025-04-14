@@ -9,7 +9,7 @@ import os
 import random
 
 # 🔐 ВСТАВЬ СЮДА ТОКЕН (если не используешь переменные окружения на Render)
-API_TOKEN = os.getenv("7638069426:AAFsxGjvX4uFokHPTufLqgXelr6nDlljsYQ")
+API_TOKEN = "7638069426:AAFsxGjvX4uFokHPTufLqgXelr6nDlljsYQ"
 
 # 🌐 Render сам подставит сюда свой URL, ничего менять не нужно
 WEBHOOK_HOST = os.getenv("RENDER_EXTERNAL_URL")
