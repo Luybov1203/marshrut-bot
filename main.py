@@ -8,10 +8,8 @@ import logging
 import os
 import random
 
-# 🔐 Прямой токен (если не используешь os.getenv)
 API_TOKEN = "7638069426:AAFsxGjvX4uFokHPTufLqgXelr6nDlljsYQ"
 
-# 🌐 Настройки вебхука для Render
 WEBHOOK_HOST = "https://marshrut-bot.onrender.com"
 WEBHOOK_PATH = "/webhook"
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
@@ -21,19 +19,16 @@ WEBAPP_PORT = int(os.environ.get("PORT", 3000))
 
 logging.basicConfig(level=logging.INFO)
 
-# Инициализация бота и диспетчера
 bot = Bot(token=API_TOKEN, parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-# --- Состояния ---
 class Form(StatesGroup):
     Q1 = State()
     Q2 = State()
 
-# --- Клавиатуры ---
 main_menu = InlineKeyboardMarkup(row_width=1).add(
-    InlineKeyboardButton("\ud83d\udd0d Узнать, где я сейчас", callback_data="diagnose"),
-    InlineKeyboardButton("\ud83d\uddd5 Посмотреть метод", callback_data="method")
+    InlineKeyboardButton("🔍 Узнать, где я сейчас", callback_data="diagnose"),
+    InlineKeyboardButton("📅 Посмотреть метод", callback_data="method")
 )
 
 diag_q1 = InlineKeyboardMarkup(row_width=2).add(
@@ -52,17 +47,16 @@ diag_q2 = InlineKeyboardMarkup(row_width=1).add(
 )
 
 nav_kb = InlineKeyboardMarkup(row_width=2).add(
-    InlineKeyboardButton("\ud83d\udccd Маршрут дня", callback_data="day_route"),
-    InlineKeyboardButton("\u2709\ufe0f Записаться на мини-сессию", callback_data="session"),
-    InlineKeyboardButton("\ud83d\udc40 Узнать подробнее", callback_data="details"),
-    InlineKeyboardButton("\ud83d\udd04 Пройти заново", callback_data="restart")
+    InlineKeyboardButton("📍 Маршрут дня", callback_data="day_route"),
+    InlineKeyboardButton("✉️ Записаться на мини-сессию", callback_data="session"),
+    InlineKeyboardButton("👀 Узнать подробнее", callback_data="details"),
+    InlineKeyboardButton("🔄 Пройти заново", callback_data="restart")
 )
 
-# --- Обработчики ---
 @dp.message_handler(commands=["start"])
 async def cmd_start(message: types.Message):
     await message.answer(
-        "\ud83d\udd0d <b>Здесь не будет мотивации.</b>\nЗато будет ясность.\n\nЕсли ты хочешь проверить, где ты сейчас — начнём.",
+        "🔍 <b>Здесь не будет мотивации.</b>\nЗато будет ясность.\n\nЕсли ты хочешь проверить, где ты сейчас — начнём.",
         reply_markup=main_menu
     )
 
@@ -81,34 +75,34 @@ async def handle_q1(callback_query: CallbackQuery, state: FSMContext):
 async def handle_q2(callback_query: CallbackQuery, state: FSMContext):
     await state.finish()
     await callback_query.message.edit_text(
-        "\ud83e\udde1 Ты перегружен. Не значит — сломан. Просто потерян фокус.\nМетод «Маршрут» начинается с точки. Вот твоя.",
+        "🧠 Ты перегружен. Не значит — сломан. Просто потерян фокус.\nМетод «Маршрут» начинается с точки. Вот твоя.",
         reply_markup=nav_kb
     )
 
 @dp.callback_query_handler(lambda c: c.data == "method")
 async def show_method(callback_query: CallbackQuery):
     await callback_query.message.edit_text(
-        "\ud83d\uddd5 Метод <b>«Маршрут»</b> — это инструмент ясности и навигации. Он помогает вернуться к себе.",
+        "📅 Метод <b>«Маршрут»</b> — это инструмент ясности и навигации. Он помогает вернуться к себе.",
         reply_markup=nav_kb
     )
 
 @dp.callback_query_handler(lambda c: c.data == "day_route")
 async def day_route(callback_query: CallbackQuery):
     cards = [
-        {"photo": "https://images.unsplash.com/photo-1506744038136-46273834b3fb", "caption": "\ud83d\uddd0 Иногда ты продолжаешь идти, даже не чувствуя дороги."},
-        {"photo": "https://images.unsplash.com/photo-1497294815431-9365093b7331", "caption": "\ud83d\udeb6\u200d♂️ Прямо — привычка. Слева — ты сам. Остановись и выбери направление."},
-        {"photo": "https://images.unsplash.com/photo-1530650052540-4693b1f4f33f", "caption": "\ud83c\udf1e Свет внутри есть. Просто тучи легли. Снимем их по частям."},
-        {"photo": "https://images.unsplash.com/photo-1488805990569-3c9e1d76d51c", "caption": "\ud83d\udd0a Вокруг — шум. Внутри — тишина. А ты где?"},
-        {"photo": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e", "caption": "\ud83e\udea8 Иногда покой — ловушка. Пора пошевелиться?"},
+        {"photo": "https://images.unsplash.com/photo-1506744038136-46273834b3fb", "caption": "🔎 Иногда ты продолжаешь идти, даже не чувствуя дороги."},
+        {"photo": "https://images.unsplash.com/photo-1497294815431-9365093b7331", "caption": "🚶 Прямо — привычка. Слева — ты сам. Остановись и выбери направление."},
+        {"photo": "https://images.unsplash.com/photo-1530650052540-4693b1f4f33f", "caption": "🌞 Свет внутри есть. Просто тучи легли. Снимем их по частям."},
+        {"photo": "https://images.unsplash.com/photo-1488805990569-3c9e1d76d51c", "caption": "📢 Вокруг — шум. Внутри — тишина. А ты где?"},
+        {"photo": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e", "caption": "🧱 Иногда покой — ловушка. Пора пошевелиться?"},
     ]
     card = random.choice(cards)
     await callback_query.message.answer_photo(photo=card["photo"], caption=card["caption"])
-    await callback_query.message.answer("\ud83d\udcca Где ты ускоряешься, чтобы не чувствовать?")
-    await callback_query.message.answer("\ud83d\udcd6 Что ты сегодня делаешь из привычки, а не из смысла?")
+    await callback_query.message.answer("📊 Где ты ускоряешься, чтобы не чувствовать?")
+    await callback_query.message.answer("📖 Что ты сегодня делаешь из привычки, а не из смысла?")
 
 @dp.callback_query_handler(lambda c: c.data == "session")
 async def session(callback_query: CallbackQuery):
-    await callback_query.message.answer("\ud83d\ude0a Иногда достаточно 15 минут, чтобы повернуть в сторону себя.\nХочешь посмотреть на свою точку? Напиши мне в ответ или запишись.")
+    await callback_query.message.answer("😊 Иногда достаточно 15 минут, чтобы повернуть в сторону себя.\nХочешь посмотреть на свою точку? Напиши мне в ответ или запишись.")
 
 @dp.callback_query_handler(lambda c: c.data == "details")
 async def details(callback_query: CallbackQuery):
@@ -118,7 +112,6 @@ async def details(callback_query: CallbackQuery):
 async def restart(callback_query: CallbackQuery):
     await cmd_start(callback_query.message)
 
-# --- Webhook ---
 async def on_startup(dp):
     await bot.set_webhook(WEBHOOK_URL)
     logging.info(f"Webhook установлен: {WEBHOOK_URL}")
