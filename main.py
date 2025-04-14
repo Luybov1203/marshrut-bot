@@ -1,6 +1,6 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from aiogram.utils import executor
+from aiogram.utils.executor import start_webhook
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
@@ -8,18 +8,28 @@ import logging
 import os
 import random
 
+# 🔐 ВСТАВЬ СЮДА ТОКЕН (если не используешь переменные окружения на Render)
 API_TOKEN = os.getenv("7638069426:AAFsxGjvX4uFokHPTufLqgXelr6nDlljsYQ")
 
+# 🌐 Render сам подставит сюда свой URL, ничего менять не нужно
+WEBHOOK_HOST = os.getenv("RENDER_EXTERNAL_URL")
+WEBHOOK_PATH = "/webhook"
+WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+
+WEBAPP_HOST = "0.0.0.0"
+WEBAPP_PORT = int(os.environ.get("PORT", 3000))
+
+# Настройка логов и бота
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN, parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-# --- Состояния ---
+# --- Состояния (FSM) ---
 class Form(StatesGroup):
     Q1 = State()
     Q2 = State()
 
-# --- Инлайн-клавиатуры ---
+# --- Клавиатуры ---
 main_menu = InlineKeyboardMarkup(row_width=1).add(
     InlineKeyboardButton("🔍 Узнать, где я сейчас", callback_data="diagnose"),
     InlineKeyboardButton("📅 Посмотреть метод", callback_data="method")
@@ -47,7 +57,7 @@ nav_kb = InlineKeyboardMarkup(row_width=2).add(
     InlineKeyboardButton("🔄 Пройти заново", callback_data="restart")
 )
 
-# --- Команды ---
+# --- Обработчики ---
 @dp.message_handler(commands=["start"])
 async def cmd_start(message: types.Message):
     await message.answer(
@@ -55,7 +65,6 @@ async def cmd_start(message: types.Message):
         reply_markup=main_menu
     )
 
-# --- Обработчики выбора ---
 @dp.callback_query_handler(lambda c: c.data == "diagnose")
 async def handle_diagnose(callback_query: CallbackQuery):
     await callback_query.message.edit_text("Что сейчас требует твоего внимания больше всего?", reply_markup=diag_q1)
@@ -63,8 +72,7 @@ async def handle_diagnose(callback_query: CallbackQuery):
 
 @dp.callback_query_handler(lambda c: c.data.startswith("q1_"), state=Form.Q1)
 async def handle_q1(callback_query: CallbackQuery, state: FSMContext):
-    answer = callback_query.data[3:]
-    await state.update_data(q1=answer)
+    await state.update_data(q1=callback_query.data[3:])
     await callback_query.message.edit_text("Что ты чувствуешь в этой сфере?", reply_markup=diag_q2)
     await Form.Q2.set()
 
@@ -107,11 +115,8 @@ async def day_route(callback_query: CallbackQuery):
             "caption": "🪨 Иногда покой — это не цель, а ловушка. Пора пошевелиться?"
         }
     ]
-    selected = random.choice(cards)
-    await callback_query.message.answer_photo(
-        photo=selected["photo"],
-        caption=selected["caption"]
-    )
+    card = random.choice(cards)
+    await callback_query.message.answer_photo(photo=card["photo"], caption=card["caption"])
     await callback_query.message.answer("📊 Где ты ускоряешься, чтобы не чувствовать?")
     await callback_query.message.answer("📖 Что ты сегодня делаешь из привычки, а не из смысла?")
 
@@ -127,6 +132,22 @@ async def details(callback_query: CallbackQuery):
 async def restart(callback_query: CallbackQuery):
     await cmd_start(callback_query.message)
 
-# --- Запуск ---
+# --- Webhook setup ---
+async def on_startup(dp):
+    await bot.set_webhook(WEBHOOK_URL)
+    logging.info(f"Webhook установлен: {WEBHOOK_URL}")
+
+async def on_shutdown(dp):
+    logging.warning("Webhook удалён")
+    await bot.delete_webhook()
+
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    start_webhook(
+        dispatcher=dp,
+        webhook_path=WEBHOOK_PATH,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        skip_updates=True,
+        host=WEBAPP_HOST,
+        port=WEBAPP_PORT,
+    )
