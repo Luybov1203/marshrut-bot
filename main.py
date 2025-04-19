@@ -8,7 +8,7 @@ import logging
 import os
 import random
 
-API_TOKEN = "7638069426:AAFsxGjvX4uFokHPTufLqgXelr6nDlljsYQ"
+API_TOKEN = "7638069426:AAFYWZLCJVz0v2y967Nh_UNKmUfh5E2bA6E"
 
 WEBHOOK_HOST = "https://marshrut-bot.onrender.com"
 WEBHOOK_PATH = "/webhook"
